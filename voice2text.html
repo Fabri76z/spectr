@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trascrizione Vocale v1.0</title>
+    <title>Trascrizione Vocale v1.1</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -89,7 +89,7 @@
 <body>
 
     <div class="container">
-        <h1>Trascrizione Vocale <small style="font-size: 14px; color: #7f8c8d; font-weight: normal;">v1.0</small></h1>
+        <h1>Trascrizione Vocale <small style="font-size: 14px; color: #7f8c8d; font-weight: normal;">v1.1</small></h1>
         <p class="subtitle">Parla nel microfono per trascrivere la tua voce in tempo reale.</p>
         
         <textarea id="transcript" placeholder="La trascrizione apparirà qui..."></textarea>
@@ -119,7 +119,7 @@
             recognition.interimResults = true;
 
             let isRecording = false;
-            let finalizedText = '';
+            let finalizedText = ''; // Conserva il testo definitivo della sessione
 
             recognition.onstart = () => {
                 isRecording = true;
@@ -130,15 +130,18 @@
 
             recognition.onresult = (event) => {
                 let interimText = '';
-                
+
+                // Scorriamo i risultati partendo dall'indice corrente restituito dall'evento
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalizedText += event.results[i][0].transcript + ' ';
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalizedText += result[0].transcript + ' ';
                     } else {
-                        interimText += event.results[i][0].transcript;
+                        interimText += result[0].transcript;
                     }
                 }
 
+                // Aggiornamosi la textarea sommando il testo stabile e quello temporaneo corrente
                 transcriptArea.value = finalizedText + interimText;
             };
 
@@ -159,6 +162,7 @@
                 if (isRecording) {
                     recognition.stop();
                 } else {
+                    // Se c'è già del testo, prepariamo lo spazio per accodare il nuovo parlato
                     if (transcriptArea.value && !transcriptArea.value.endsWith(' ')) {
                         transcriptArea.value += ' ';
                     }

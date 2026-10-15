@@ -3,21 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO-SPECTRUM V3.5 - Advanced Audio Suite</title>
+    <title>PRO-SPECTRUM V4.0 - Master Suite</title>
     <style>
         :root {
-            --bg-base: #0c0c0e;
-            --panel-bg: #16161a;
-            --panel-header: #1f1f26;
-            --border-color: #2e2e38;
+            --bg-base: #09090c;
+            --panel-bg: #131318;
+            --panel-header: #1a1a22;
+            --border-color: #272733;
             --accent: #00e5ff;
             --accent-dim: rgba(0, 229, 255, 0.15);
             --accent-glow: rgba(0, 229, 255, 0.3);
-            --text-main: #f0f0f5;
-            --text-muted: #9999a6;
+            --text-main: #f4f4f8;
+            --text-muted: #8c8c9e;
             --danger: #ff3366;
             --warning: #ffaa00;
             --success: #00cc66;
+        }
+
+        /* Color Theme Overrides */
+        body.theme-matrix {
+            --accent: #00ff66;
+            --accent-dim: rgba(0, 255, 102, 0.15);
+            --accent-glow: rgba(0, 255, 102, 0.3);
+            --danger: #ff2255;
+            --warning: #ffaa00;
+        }
+
+        body.theme-sunset {
+            --accent: #ff5500;
+            --accent-dim: rgba(255, 85, 0, 0.15);
+            --accent-glow: rgba(255, 85, 0, 0.3);
+            --danger: #ff0055;
+            --warning: #ffcc00;
+        }
+
+        body.theme-violet {
+            --accent: #b026ff;
+            --accent-dim: rgba(176, 38, 255, 0.15);
+            --accent-glow: rgba(176, 38, 255, 0.3);
+            --danger: #ff2a6d;
+            --warning: #05d9e8;
+        }
+
+        body.theme-mono {
+            --accent: #ffffff;
+            --accent-dim: rgba(255, 255, 255, 0.15);
+            --accent-glow: rgba(255, 255, 255, 0.3);
+            --danger: #aaaaaa;
+            --warning: #cccccc;
         }
 
         * {
@@ -36,19 +69,37 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
+            transition: background 0.3s ease;
         }
 
         .plugin-container {
             width: 100%;
-            max-width: 1300px;
+            max-width: 1400px;
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+            border-radius: 12px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Fullscreen state styling */
+        .plugin-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            border-radius: 0;
+            border: none;
+        }
+        .plugin-container:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            border-radius: 0;
+            border: none;
         }
 
         /* HEADER */
@@ -68,7 +119,7 @@
         }
 
         .brand h1 {
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             letter-spacing: 1.5px;
             color: var(--text-main);
@@ -79,24 +130,24 @@
             background: var(--accent-dim);
             color: var(--accent);
             padding: 3px 8px;
-            border-radius: 3px;
+            border-radius: 4px;
             border: 1px solid var(--accent);
             font-weight: 600;
         }
 
         .master-controls {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
         }
 
         /* RACK DI CONTROLLO / PARAMETRI */
         .control-rack {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
             padding: 15px 25px;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.25);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -134,6 +185,7 @@
             font-size: 0.8rem;
             outline: none;
             cursor: pointer;
+            transition: border-color 0.2s;
         }
 
         select:focus, input[type="range"]:focus {
@@ -144,8 +196,8 @@
         .display-container {
             position: relative;
             width: 100%;
-            height: 500px;
-            background: #08080a;
+            height: 520px;
+            background: #060608;
         }
 
         canvas {
@@ -154,7 +206,7 @@
             height: 100%;
         }
 
-        /* FOOTER / METERS */
+        /* FOOTER & METERS */
         footer {
             display: flex;
             justify-content: space-between;
@@ -198,7 +250,7 @@
             background: var(--accent);
             color: var(--bg-base);
             border: none;
-            padding: 8px 20px;
+            padding: 8px 18px;
             border-radius: 4px;
             font-weight: 700;
             cursor: pointer;
@@ -218,10 +270,35 @@
             color: white;
         }
 
+        button.btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        button.btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .checkbox-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+
         .checkbox-label {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             font-size: 0.75rem;
             color: var(--text-muted);
             cursor: pointer;
@@ -235,20 +312,44 @@
 </head>
 <body>
 
-    <div class="plugin-container">
+    <div class="plugin-container" id="pluginContainer">
         <!-- HEADER -->
         <header>
             <div class="brand">
                 <h1>PRO-SPECTRUM ANALYZER</h1>
-                <span>PRO SUITE</span>
+                <span>ULTRA V4.0</span>
             </div>
             <div class="master-controls">
+                <button id="fullscreenBtn" class="btn-secondary">Fullscreen</button>
                 <button id="toggleBtn" class="btn-primary">Avvia Microfono</button>
             </div>
         </header>
 
-        <!-- RACK PARAMETRI PROFESIONALI -->
+        <!-- RACK PARAMETRI PROFESSIONALI -->
         <div class="control-rack">
+            <div class="control-group">
+                <label>Visual Mode</label>
+                <select id="modeSelect">
+                    <option value="filled">Filled Gradient</option>
+                    <option value="line">Line Wireframe</option>
+                    <option value="bars">Bars / FFT bins</option>
+                    <option value="neon">Neon Glow</option>
+                    <option value="octave">Octave Bands / Retro VU</option>
+                    <option value="waterfall">Waterfall 3D Slice</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Color Theme</label>
+                <select id="themeSelect">
+                    <option value="theme-cyan">Cyber Cyan (Default)</option>
+                    <option value="theme-matrix">Matrix Green</option>
+                    <option value="theme-sunset">Studio Sunset</option>
+                    <option value="theme-violet">Deep Space Violet</option>
+                    <option value="theme-mono">Monochrome Hi-Fi</option>
+                </select>
+            </div>
+
             <div class="control-group">
                 <label>FFT Resolution <span id="fftVal">4096</span></label>
                 <select id="fftSelect">
@@ -256,6 +357,16 @@
                     <option value="4096" selected>4096 (Balanced)</option>
                     <option value="8192">8192 (High Res)</option>
                     <option value="16384">16384 (Ultra Detail)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Window Function</label>
+                <select id="windowSelect">
+                    <option value="hann" selected>Hann (Recommended)</option>
+                    <option value="hamming">Hamming</option>
+                    <option value="blackman">Blackman</option>
+                    <option value="rectangular">Rectangular (None)</option>
                 </select>
             </div>
 
@@ -269,22 +380,11 @@
                 <input type="range" id="smoothRange" min="0.1" max="0.95" step="0.05" value="0.85">
             </div>
 
-            <div class="control-group">
-                <label>Visual Mode</label>
-                <select id="modeSelect">
-                    <option value="filled">Filled Gradient</option>
-                    <option value="line">Line Wireframe</option>
-                    <option value="bars">Bars / FFT bins</option>
-                </select>
-            </div>
-
-            <div class="control-group" style="justify-content: center; gap: 10px;">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="peakHoldCheck" checked> Mostra Peak Hold
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="gridCheck" checked> Griglia Logaritmica
-                </label>
+            <div class="control-group" style="justify-content: center;">
+                <div class="checkbox-row">
+                    <label class="checkbox-label"><input type="checkbox" id="peakHoldCheck" checked> Peak Hold</label>
+                    <label class="checkbox-label"><input type="checkbox" id="gridCheck" checked> Grid</label>
+                </div>
             </div>
         </div>
 
@@ -297,7 +397,7 @@
         <footer>
             <div class="meters-panel">
                 <div class="meter-bar-wrapper">
-                    <span>Peak L/R:</span>
+                    <span>RMS / Peak:</span>
                     <div class="meter-container">
                         <div id="meterFill" class="meter-fill"></div>
                     </div>
@@ -310,17 +410,21 @@
 
     <script>
         const toggleBtn = document.getElementById('toggleBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const pluginContainer = document.getElementById('pluginContainer');
         const statusText = document.getElementById('statusText');
         const canvas = document.getElementById('spectrumCanvas');
         const ctx = canvas.getContext('2d');
 
+        const modeSelect = document.getElementById('modeSelect');
+        const themeSelect = document.getElementById('themeSelect');
         const fftSelect = document.getElementById('fftSelect');
         const fftVal = document.getElementById('fftVal');
+        const windowSelect = document.getElementById('windowSelect');
         const tiltRange = document.getElementById('tiltRange');
         const tiltVal = document.getElementById('tiltVal');
         const smoothRange = document.getElementById('smoothRange');
         const smoothVal = document.getElementById('smoothVal');
-        const modeSelect = document.getElementById('modeSelect');
         const peakHoldCheck = document.getElementById('peakHoldCheck');
         const gridCheck = document.getElementById('gridCheck');
         const meterFill = document.getElementById('meterFill');
@@ -332,6 +436,7 @@
         let isRunning = false;
         let animationId = null;
         let peakValues = [];
+        let waterfallHistory = [];
 
         function resizeCanvas() {
             const rect = canvas.getBoundingClientRect();
@@ -342,6 +447,25 @@
 
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
+
+        // Fullscreen Toggle
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                pluginContainer.requestFullscreen().catch(err => {
+                    console.error("Errore attivazione fullscreen:", err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Theme Switcher
+        themeSelect.addEventListener('change', () => {
+            document.body.className = '';
+            if (themeSelect.value !== 'theme-cyan') {
+                document.body.classList.add(themeSelect.value);
+            }
+        });
 
         // UI Event Listeners
         fftSelect.addEventListener('change', () => {
@@ -375,15 +499,15 @@
                 isRunning = true;
                 toggleBtn.textContent = 'Ferma Analisi';
                 toggleBtn.classList.add('active');
-                statusText.textContent = 'Attivo (Live)';
+                statusText.textContent = 'Attivo (Live Mic)';
                 statusText.style.color = 'var(--success)';
                 sampleRateVal.textContent = (audioCtx.sampleRate / 1000).toFixed(1) + ' kHz';
                 
                 drawSpectrum();
             } catch (err) {
-                alert('Impossibile accedere al microfono. Controlla i permessi del browser.');
+                alert('Impossibile accedere al microfono. Verifica i permessi del browser.');
                 console.error(err);
-                statusText.textContent = 'Errore';
+                statusText.textContent = 'Errore permessi';
             }
         }
 
@@ -416,10 +540,10 @@
 
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
             ctx.lineWidth = 1;
-            ctx.fillStyle = '#777785';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
             ctx.font = '10px sans-serif';
 
-            // dB Lines (-6, -18, -30, -42, -54, -66 dB)
+            // dB Lines
             const dbSteps = [-6, -18, -30, -42, -54, -66];
             dbSteps.forEach(db => {
                 const y = height * (1 - (db + 72) / 72);
@@ -478,12 +602,13 @@
             const maxLog = Math.log10(20000);
             const tiltFactor = parseFloat(tiltRange.value);
             const mode = modeSelect.value;
+            const computedAccent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#00e5ff';
 
             if (peakValues.length !== Math.round(width)) {
                 peakValues = new Array(Math.round(width)).fill(0);
             }
 
-            // Calcola RMS generale per il meter nel footer
+            // RMS Level Meter calculation
             let sumSquares = 0;
             for(let i=0; i<bufferLength; i++) {
                 let norm = dataArray[i] / 255;
@@ -492,14 +617,78 @@
             let rms = Math.sqrt(sumSquares / bufferLength);
             meterFill.style.width = Math.min(100, rms * 250) + '%';
 
-            // Configurazione stile di disegno
+            // --- VISUALIZATION MODES ---
+            if (mode === 'waterfall') {
+                // Waterfall 3D-style Slice Mode
+                let sliceData = [];
+                for (let x = 0; x < width; x += 4) {
+                    const logFreq = minLog + (x / width) * (maxLog - minLog);
+                    const freq = Math.pow(10, logFreq);
+                    if (freq <= nyquist) {
+                        const index = Math.round((freq / nyquist) * bufferLength);
+                        sliceData.push(dataArray[index] || 0);
+                    } else {
+                        sliceData.push(0);
+                    }
+                }
+                waterfallHistory.unshift(sliceData);
+                if (waterfallHistory.length > 70) waterfallHistory.pop();
+
+                ctx.save();
+                for (let i = 0; i < waterfallHistory.length; i++) {
+                    let alpha = 1 - (i / waterfallHistory.length);
+                    ctx.strokeStyle = computedAccent;
+                    ctx.globalAlpha = alpha * 0.8;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    let row = waterfallHistory[i];
+                    let stepX = width / row.length;
+                    for (let j = 0; j < row.length; j++) {
+                        let x = j * stepX;
+                        let y = (height * 0.7) - (i * 5) - ((row[j] / 255) * 80);
+                        if (j === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+                ctx.restore();
+                return;
+            }
+
+            if (mode === 'octave' || mode === 'bars') {
+                // Octave Bands & Bar Bins mode
+                const barCount = mode === 'octave' ? 32 : 80;
+                const barWidth = width / barCount;
+                for (let i = 0; i < barCount; i++) {
+                    let index = Math.floor((i / barCount) * (bufferLength / 2));
+                    let value = dataArray[index] || 0;
+                    let normY = (value / 255) * height;
+                    
+                    let grad = ctx.createLinearGradient(0, height, 0, 0);
+                    grad.addColorStop(0, computedAccent);
+                    grad.addColorStop(1, 'rgba(255,255,255,0.8)');
+                    ctx.fillStyle = grad;
+
+                    ctx.fillRect(i * barWidth + 2, height - normY, barWidth - 4, normY);
+                }
+                return;
+            }
+
+            // Standard continuous curves (Filled, Line, Neon)
             ctx.lineWidth = mode === 'line' ? 2 : 1.5;
-            ctx.strokeStyle = '#00e5ff';
+            ctx.strokeStyle = computedAccent;
             
             let gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, 'rgba(0, 229, 255, 0.35)');
-            gradient.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+            gradient.addColorStop(0, computedAccent);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = gradient;
+
+            if (mode === 'neon') {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = computedAccent;
+            } else {
+                ctx.shadowBlur = 0;
+            }
 
             ctx.beginPath();
             ctx.moveTo(0, height);
@@ -515,7 +704,6 @@
                 const index = Math.round((freq / nyquist) * bufferLength);
                 let value = dataArray[index] || 0;
 
-                // Applicazione della curva di Tilt compensata in base alla frequenza
                 let octaveMultiplier = Math.log2(freq / 1000); 
                 let tiltAdjustment = octaveMultiplier * tiltFactor * 1.5;
                 let adjustedValue = Math.min(255, Math.max(0, value + tiltAdjustment));
@@ -525,39 +713,34 @@
 
                 points.push({ x, y });
 
-                // Gestione Peak Hold decay
                 if (peakValues[x] === undefined || y < peakValues[x]) {
-                    peakValues[x] = y; // Più alto visivamente = valore Y minore
+                    peakValues[x] = y;
                 } else {
-                    peakValues[x] += 1.5; // Decadimento graduale del picco
+                    peakValues[x] += 1.8;
                     if (peakValues[x] > height) peakValues[x] = height;
                 }
+            }
 
-                if (mode === 'bars' && x % 4 === 0) {
-                    ctx.fillRect(x, y, 3, height - y);
+            if (points.length > 0) {
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let p of points) {
+                    ctx.lineTo(p.x, p.y);
                 }
             }
 
-            if (mode !== 'bars') {
-                if (points.length > 0) {
-                    ctx.moveTo(points[0].x, points[0].y);
-                    for (let p of points) {
-                        ctx.lineTo(p.x, p.y);
-                    }
-                }
-                if (mode === 'filled') {
-                    ctx.lineTo(width, height);
-                    ctx.lineTo(0, height);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-                ctx.stroke();
+            if (mode === 'filled') {
+                ctx.lineTo(width, height);
+                ctx.lineTo(0, height);
+                ctx.closePath();
+                ctx.fill();
             }
+            ctx.stroke();
 
-            // Disegno della linea Peak Hold superiore
-            if (peakHoldCheck.checked) {
-                ctx.strokeStyle = 'rgba(255, 170, 0, 0.7)';
+            // Peak Hold rendering
+            if (peakHoldCheck.checked && mode !== 'waterfall') {
+                ctx.strokeStyle = 'rgba(255, 170, 0, 0.8)';
                 ctx.lineWidth = 1;
+                ctx.shadowBlur = 0;
                 ctx.beginPath();
                 for (let x = 0; x < width; x++) {
                     if (x === 0) ctx.moveTo(x, peakValues[x]);

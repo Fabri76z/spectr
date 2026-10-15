@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO-SPECTRUM V4.0 - Master Suite</title>
+    <title>PRO-SPECTRUM V4.5 - Master Suite</title>
     <style>
         :root {
-            --bg-base: #09090c;
-            --panel-bg: #131318;
-            --panel-header: #1a1a22;
-            --border-color: #272733;
+            /* FabFilter Dark / Cyan (Default) */
+            --bg-base: #121215;
+            --panel-bg: #1a1a20;
+            --panel-header: #22222b;
+            --border-color: #31313d;
             --accent: #00e5ff;
             --accent-dim: rgba(0, 229, 255, 0.15);
-            --accent-glow: rgba(0, 229, 255, 0.3);
+            --accent-glow: rgba(0, 229, 255, 0.35);
             --text-main: #f4f4f8;
             --text-muted: #8c8c9e;
             --danger: #ff3366;
@@ -20,37 +21,56 @@
             --success: #00cc66;
         }
 
-        /* Color Theme Overrides */
-        body.theme-matrix {
+        /* SSL Console Green */
+        body.theme-ssl {
+            --bg-base: #0a100d;
+            --panel-bg: #131f18;
+            --panel-header: #1b2d23;
+            --border-color: #274233;
             --accent: #00ff66;
             --accent-dim: rgba(0, 255, 102, 0.15);
-            --accent-glow: rgba(0, 255, 102, 0.3);
-            --danger: #ff2255;
-            --warning: #ffaa00;
-        }
-
-        body.theme-sunset {
-            --accent: #ff5500;
-            --accent-dim: rgba(255, 85, 0, 0.15);
-            --accent-glow: rgba(255, 85, 0, 0.3);
-            --danger: #ff0055;
+            --accent-glow: rgba(0, 255, 102, 0.35);
+            --danger: #ff2a5f;
             --warning: #ffcc00;
         }
 
-        body.theme-violet {
-            --accent: #b026ff;
-            --accent-dim: rgba(176, 38, 255, 0.15);
-            --accent-glow: rgba(176, 38, 255, 0.3);
-            --danger: #ff2a6d;
-            --warning: #05d9e8;
+        /* Neve Vintage Amber */
+        body.theme-neve {
+            --bg-base: #14110e;
+            --panel-bg: #221c17;
+            --panel-header: #30261f;
+            --border-color: #483b30;
+            --accent: #ff9900;
+            --accent-dim: rgba(255, 153, 0, 0.15);
+            --accent-glow: rgba(255, 153, 0, 0.35);
+            --danger: #ff3344;
+            --warning: #ffdd00;
         }
 
-        body.theme-mono {
-            --accent: #ffffff;
-            --accent-dim: rgba(255, 255, 255, 0.15);
-            --accent-glow: rgba(255, 255, 255, 0.3);
-            --danger: #aaaaaa;
-            --warning: #cccccc;
+        /* Slate Cyber Purple */
+        body.theme-slate {
+            --bg-base: #0e0b14;
+            --panel-bg: #181322;
+            --panel-header: #231b30;
+            --border-color: #382b4d;
+            --accent: #b026ff;
+            --accent-dim: rgba(176, 38, 255, 0.15);
+            --accent-glow: rgba(176, 38, 255, 0.35);
+            --danger: #ff2266;
+            --warning: #00ffff;
+        }
+
+        /* Solid State Orange */
+        body.theme-orange {
+            --bg-base: #140d0a;
+            --panel-bg: #221612;
+            --panel-header: #301f19;
+            --border-color: #4c3127;
+            --accent: #ff5500;
+            --accent-dim: rgba(255, 85, 0, 0.15);
+            --accent-glow: rgba(255, 85, 0, 0.35);
+            --danger: #ff0055;
+            --warning: #ffbb00;
         }
 
         * {
@@ -196,8 +216,10 @@
         .display-container {
             position: relative;
             width: 100%;
-            height: 520px;
+            flex: 1;
+            min-height: 480px;
             background: #060608;
+            display: flex;
         }
 
         canvas {
@@ -317,7 +339,7 @@
         <header>
             <div class="brand">
                 <h1>PRO-SPECTRUM ANALYZER</h1>
-                <span>ULTRA V4.0</span>
+                <span>ULTRA V4.5</span>
             </div>
             <div class="master-controls">
                 <button id="fullscreenBtn" class="btn-secondary">Fullscreen</button>
@@ -331,22 +353,21 @@
                 <label>Visual Mode</label>
                 <select id="modeSelect">
                     <option value="filled">Filled Gradient</option>
-                    <option value="line">Line Wireframe</option>
-                    <option value="bars">Bars / FFT bins</option>
-                    <option value="neon">Neon Glow</option>
-                    <option value="octave">Octave Bands / Retro VU</option>
-                    <option value="waterfall">Waterfall 3D Slice</option>
+                    <option value="neon">Neon Wireframe</option>
+                    <option value="octave">ISO 1/3 Octave Bands</option>
+                    <option value="waterfall">Waterfall 3D Spectrogram</option>
+                    <option value="oscilloscope">Oscilloscope (Time-Domain)</option>
                 </select>
             </div>
 
             <div class="control-group">
                 <label>Color Theme</label>
                 <select id="themeSelect">
-                    <option value="theme-cyan">Cyber Cyan (Default)</option>
-                    <option value="theme-matrix">Matrix Green</option>
-                    <option value="theme-sunset">Studio Sunset</option>
-                    <option value="theme-violet">Deep Space Violet</option>
-                    <option value="theme-mono">Monochrome Hi-Fi</option>
+                    <option value="theme-fabfilter">FabFilter Cyan (Default)</option>
+                    <option value="theme-ssl">SSL Console Green</option>
+                    <option value="theme-neve">Neve Vintage Amber</option>
+                    <option value="theme-slate">Slate Cyber Purple</option>
+                    <option value="theme-orange">Solid State Orange</option>
                 </select>
             </div>
 
@@ -357,16 +378,6 @@
                     <option value="4096" selected>4096 (Balanced)</option>
                     <option value="8192">8192 (High Res)</option>
                     <option value="16384">16384 (Ultra Detail)</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label>Window Function</label>
-                <select id="windowSelect">
-                    <option value="hann" selected>Hann (Recommended)</option>
-                    <option value="hamming">Hamming</option>
-                    <option value="blackman">Blackman</option>
-                    <option value="rectangular">Rectangular (None)</option>
                 </select>
             </div>
 
@@ -420,7 +431,6 @@
         const themeSelect = document.getElementById('themeSelect');
         const fftSelect = document.getElementById('fftSelect');
         const fftVal = document.getElementById('fftVal');
-        const windowSelect = document.getElementById('windowSelect');
         const tiltRange = document.getElementById('tiltRange');
         const tiltVal = document.getElementById('tiltVal');
         const smoothRange = document.getElementById('smoothRange');
@@ -448,7 +458,7 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Fullscreen Toggle
+        // Fullscreen Toggle with Dynamic Text
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 pluginContainer.requestFullscreen().catch(err => {
@@ -459,10 +469,19 @@
             }
         });
 
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = 'Exit Fullscreen';
+            } else {
+                fullscreenBtn.textContent = 'Fullscreen';
+            }
+            setTimeout(resizeCanvas, 100);
+        });
+
         // Theme Switcher
         themeSelect.addEventListener('change', () => {
             document.body.className = '';
-            if (themeSelect.value !== 'theme-cyan') {
+            if (themeSelect.value !== 'theme-fabfilter') {
                 document.body.classList.add(themeSelect.value);
             }
         });
@@ -618,8 +637,36 @@
             meterFill.style.width = Math.min(100, rms * 250) + '%';
 
             // --- VISUALIZATION MODES ---
+            if (mode === 'oscilloscope') {
+                // Time-domain Oscilloscope mode
+                const timeData = new Uint8Array(analyser.fftSize);
+                analyser.getByteTimeDomainData(timeData);
+
+                ctx.save();
+                ctx.strokeStyle = computedAccent;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = computedAccent;
+                ctx.beginPath();
+
+                const sliceWidth = width / timeData.length;
+                let x = 0;
+                for (let i = 0; i < timeData.length; i++) {
+                    let v = timeData[i] / 128.0; // 1.0 is center
+                    let y = v * (height / 2);
+
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+
+                    x += sliceWidth;
+                }
+                ctx.stroke();
+                ctx.restore();
+                return;
+            }
+
             if (mode === 'waterfall') {
-                // Waterfall 3D-style Slice Mode
+                // Waterfall 3D Spectrogram History Mode
                 let sliceData = [];
                 for (let x = 0; x < width; x += 4) {
                     const logFreq = minLog + (x / width) * (maxLog - minLog);
@@ -632,20 +679,20 @@
                     }
                 }
                 waterfallHistory.unshift(sliceData);
-                if (waterfallHistory.length > 70) waterfallHistory.pop();
+                if (waterfallHistory.length > 90) waterfallHistory.pop();
 
                 ctx.save();
                 for (let i = 0; i < waterfallHistory.length; i++) {
                     let alpha = 1 - (i / waterfallHistory.length);
                     ctx.strokeStyle = computedAccent;
-                    ctx.globalAlpha = alpha * 0.8;
+                    ctx.globalAlpha = alpha * 0.85;
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
                     let row = waterfallHistory[i];
                     let stepX = width / row.length;
                     for (let j = 0; j < row.length; j++) {
                         let x = j * stepX;
-                        let y = (height * 0.7) - (i * 5) - ((row[j] / 255) * 80);
+                        let y = (height * 0.85) - (i * 5.5) - ((row[j] / 255) * 100);
                         if (j === 0) ctx.moveTo(x, y);
                         else ctx.lineTo(x, y);
                     }
@@ -655,27 +702,31 @@
                 return;
             }
 
-            if (mode === 'octave' || mode === 'bars') {
-                // Octave Bands & Bar Bins mode
-                const barCount = mode === 'octave' ? 32 : 80;
+            if (mode === 'octave') {
+                // ISO 1/3 Octave Bands mode
+                const barCount = 28;
                 const barWidth = width / barCount;
                 for (let i = 0; i < barCount; i++) {
-                    let index = Math.floor((i / barCount) * (bufferLength / 2));
-                    let value = dataArray[index] || 0;
+                    let index = Math.floor(Math.pow(i / barCount, 1.8) * (bufferLength / 2));
+                    let value = dataArray[Math.min(index, bufferLength - 1)] || 0;
                     let normY = (value / 255) * height;
                     
                     let grad = ctx.createLinearGradient(0, height, 0, 0);
                     grad.addColorStop(0, computedAccent);
-                    grad.addColorStop(1, 'rgba(255,255,255,0.8)');
+                    grad.addColorStop(1, 'rgba(255,255,255,0.9)');
                     ctx.fillStyle = grad;
 
-                    ctx.fillRect(i * barWidth + 2, height - normY, barWidth - 4, normY);
+                    ctx.fillRect(i * barWidth + 3, height - normY, barWidth - 6, normY);
+
+                    // Peak line per bar
+                    ctx.fillStyle = '#ffaa00';
+                    ctx.fillRect(i * barWidth + 3, height - normY - 3, barWidth - 6, 2);
                 }
                 return;
             }
 
-            // Standard continuous curves (Filled, Line, Neon)
-            ctx.lineWidth = mode === 'line' ? 2 : 1.5;
+            // Standard continuous curves (Filled Gradient, Neon Wireframe)
+            ctx.lineWidth = mode === 'neon' ? 2 : 1.5;
             ctx.strokeStyle = computedAccent;
             
             let gradient = ctx.createLinearGradient(0, 0, 0, height);
@@ -684,7 +735,7 @@
             ctx.fillStyle = gradient;
 
             if (mode === 'neon') {
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 18;
                 ctx.shadowColor = computedAccent;
             } else {
                 ctx.shadowBlur = 0;
@@ -738,7 +789,7 @@
 
             // Peak Hold rendering
             if (peakHoldCheck.checked && mode !== 'waterfall') {
-                ctx.strokeStyle = 'rgba(255, 170, 0, 0.8)';
+                ctx.strokeStyle = 'rgba(255, 170, 0, 0.85)';
                 ctx.lineWidth = 1;
                 ctx.shadowBlur = 0;
                 ctx.beginPath();

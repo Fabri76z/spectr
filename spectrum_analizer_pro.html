@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO-SPECTRUM V4.5 - Master Suite</title>
+    <title>PRO-SPECTRUM V5.0 - Master Suite</title>
     <style>
         :root {
             /* FabFilter Dark / Cyan (Default) */
@@ -71,6 +71,45 @@
             --accent-glow: rgba(255, 85, 0, 0.35);
             --danger: #ff0055;
             --warning: #ffbb00;
+        }
+
+        /* Neon Synthwave */
+        body.theme-synthwave {
+            --bg-base: #12081c;
+            --panel-bg: #1c102e;
+            --panel-header: #291845;
+            --border-color: #482a7a;
+            --accent: #ff007f;
+            --accent-dim: rgba(255, 0, 127, 0.15);
+            --accent-glow: rgba(255, 0, 127, 0.35);
+            --danger: #ff0033;
+            --warning: #00ffff;
+        }
+
+        /* Arctic Ice */
+        body.theme-arctic {
+            --bg-base: #080c14;
+            --panel-bg: #121a29;
+            --panel-header: #1b263d;
+            --border-color: #2e436e;
+            --accent: #00bfff;
+            --accent-dim: rgba(0, 191, 255, 0.15);
+            --accent-glow: rgba(0, 191, 255, 0.35);
+            --danger: #ff4500;
+            --warning: #adff2f;
+        }
+
+        /* Tokyo Neon */
+        body.theme-tokyo {
+            --bg-base: #0f0b12;
+            --panel-bg: #1a1321;
+            --panel-header: #261c33;
+            --border-color: #423057;
+            --accent: #ff3399;
+            --accent-dim: rgba(255, 51, 153, 0.15);
+            --accent-glow: rgba(255, 51, 153, 0.35);
+            --danger: #ff0000;
+            --warning: #ffff00;
         }
 
         * {
@@ -217,7 +256,7 @@
             position: relative;
             width: 100%;
             flex: 1;
-            min-height: 480px;
+            min-height: 500px;
             background: #060608;
             display: flex;
         }
@@ -248,14 +287,14 @@
         .meter-bar-wrapper {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .meter-container {
-            width: 120px;
-            height: 8px;
+            width: 160px;
+            height: 10px;
             background: var(--bg-base);
-            border-radius: 4px;
+            border-radius: 5px;
             overflow: hidden;
             border: 1px solid var(--border-color);
             position: relative;
@@ -264,8 +303,9 @@
         .meter-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--success), var(--warning) 80%, var(--danger));
-            transition: width 0.05s ease;
+            background: linear-gradient(90deg, var(--success), var(--warning) 70%, var(--danger));
+            box-shadow: 0 0 8px var(--accent-glow);
+            transition: width 0.03s linear;
         }
 
         button.btn-primary {
@@ -339,7 +379,7 @@
         <header>
             <div class="brand">
                 <h1>PRO-SPECTRUM ANALYZER</h1>
-                <span>ULTRA V4.5</span>
+                <span>ULTRA V5.0</span>
             </div>
             <div class="master-controls">
                 <button id="fullscreenBtn" class="btn-secondary">Fullscreen</button>
@@ -355,8 +395,12 @@
                     <option value="filled">Filled Gradient</option>
                     <option value="neon">Neon Wireframe</option>
                     <option value="octave">ISO 1/3 Octave Bands</option>
+                    <option value="hiress_octave">High-Res Narrow Octave Bands</option>
+                    <option value="vintage_led">Vintage Stereo LED VU Bars</option>
                     <option value="waterfall">Waterfall 3D Spectrogram</option>
                     <option value="oscilloscope">Oscilloscope (Time-Domain)</option>
+                    <option value="dual">Dual-Trace (Spectrum + Waveform)</option>
+                    <option value="radial">Radial / Circular Spectrum</option>
                 </select>
             </div>
 
@@ -368,6 +412,9 @@
                     <option value="theme-neve">Neve Vintage Amber</option>
                     <option value="theme-slate">Slate Cyber Purple</option>
                     <option value="theme-orange">Solid State Orange</option>
+                    <option value="theme-synthwave">Neon Synthwave</option>
+                    <option value="theme-arctic">Arctic Ice</option>
+                    <option value="theme-tokyo">Tokyo Neon</option>
                 </select>
             </div>
 
@@ -408,7 +455,7 @@
         <footer>
             <div class="meters-panel">
                 <div class="meter-bar-wrapper">
-                    <span>RMS / Peak:</span>
+                    <span>RMS Level:</span>
                     <div class="meter-container">
                         <div id="meterFill" class="meter-fill"></div>
                     </div>
@@ -446,6 +493,8 @@
         let isRunning = false;
         let animationId = null;
         let peakValues = [];
+        let octavePeakValues = [];
+        let hiressPeakValues = [];
         let waterfallHistory = [];
 
         function resizeCanvas() {
@@ -491,6 +540,8 @@
             fftVal.textContent = fftSelect.value;
             if (analyser) analyser.fftSize = parseInt(fftSelect.value);
             peakValues = [];
+            octavePeakValues = [];
+            hiressPeakValues = [];
         });
 
         tiltRange.addEventListener('input', () => {
@@ -627,14 +678,16 @@
                 peakValues = new Array(Math.round(width)).fill(0);
             }
 
-            // RMS Level Meter calculation
+            // RMS Level Meter calculation (weighted & more dynamic fill representation)
             let sumSquares = 0;
             for(let i=0; i<bufferLength; i++) {
                 let norm = dataArray[i] / 255;
                 sumSquares += norm * norm;
             }
             let rms = Math.sqrt(sumSquares / bufferLength);
-            meterFill.style.width = Math.min(100, rms * 250) + '%';
+            // Boost sensitivity and responsiveness for the RMS meter bar
+            let rmsDisplayWidth = Math.min(100, Math.pow(rms * 2.8, 0.7) * 100);
+            meterFill.style.width = rmsDisplayWidth + '%';
 
             // --- VISUALIZATION MODES ---
             if (mode === 'oscilloscope') {
@@ -652,13 +705,98 @@
                 const sliceWidth = width / timeData.length;
                 let x = 0;
                 for (let i = 0; i < timeData.length; i++) {
-                    let v = timeData[i] / 128.0; // 1.0 is center
+                    let v = timeData[i] / 128.0;
                     let y = v * (height / 2);
 
                     if (i === 0) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
 
                     x += sliceWidth;
+                }
+                ctx.stroke();
+                ctx.restore();
+                return;
+            }
+
+            if (mode === 'dual') {
+                // Dual Trace Mode: Top half spectrum, bottom half oscilloscope
+                const halfHeight = height / 2;
+
+                // Draw Top Spectrum
+                ctx.save();
+                ctx.strokeStyle = computedAccent;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(0, halfHeight);
+                for (let x = 0; x < width; x++) {
+                    const logFreq = minLog + (x / width) * (maxLog - minLog);
+                    const freq = Math.pow(10, logFreq);
+                    if (freq <= nyquist) {
+                        const index = Math.round((freq / nyquist) * bufferLength);
+                        let val = (dataArray[index] || 0) / 255;
+                        let y = halfHeight - (val * (halfHeight - 20));
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                // Divider line
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                ctx.beginPath();
+                ctx.moveTo(0, halfHeight);
+                ctx.lineTo(width, halfHeight);
+                ctx.stroke();
+
+                // Draw Bottom Oscilloscope
+                const timeData = new Uint8Array(analyser.fftSize);
+                analyser.getByteTimeDomainData(timeData);
+                ctx.save();
+                ctx.strokeStyle = '#ffaa00';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                const sliceWidth = width / timeData.length;
+                let tx = 0;
+                for (let i = 0; i < timeData.length; i++) {
+                    let v = timeData[i] / 128.0;
+                    let ty = halfHeight + ((v - 1) * (halfHeight / 2));
+                    if (i === 0) ctx.moveTo(tx, ty);
+                    else ctx.lineTo(tx, ty);
+                    tx += sliceWidth;
+                }
+                ctx.stroke();
+                ctx.restore();
+                return;
+            }
+
+            if (mode === 'radial') {
+                // Radial / Circular Spectrum Analyzer
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const radius = Math.min(centerX, centerY) * 0.45;
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.strokeStyle = computedAccent;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = computedAccent;
+
+                const bins = 180;
+                ctx.beginPath();
+                for (let i = 0; i < bins; i++) {
+                    const angle = (i / bins) * Math.PI * 2;
+                    const dataIndex = Math.floor((i / bins) * (bufferLength / 2));
+                    const val = (dataArray[dataIndex] || 0) / 255;
+                    const barLen = radius + (val * radius * 1.2);
+
+                    const x1 = Math.cos(angle) * radius;
+                    const y1 = Math.sin(angle) * radius;
+                    const x2 = Math.cos(angle) * barLen;
+                    const y2 = Math.sin(angle) * barLen;
+
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
                 }
                 ctx.stroke();
                 ctx.restore();
@@ -703,13 +841,27 @@
             }
 
             if (mode === 'octave') {
-                // ISO 1/3 Octave Bands mode
+                // ISO 1/3 Octave Bands mode (28 bands) with working Peak Hold
                 const barCount = 28;
                 const barWidth = width / barCount;
+
+                if (octavePeakValues.length !== barCount) {
+                    octavePeakValues = new Array(barCount).fill(0);
+                }
+
                 for (let i = 0; i < barCount; i++) {
                     let index = Math.floor(Math.pow(i / barCount, 1.8) * (bufferLength / 2));
                     let value = dataArray[Math.min(index, bufferLength - 1)] || 0;
                     let normY = (value / 255) * height;
+
+                    // Peak hold tracking per bar
+                    if (peakHoldCheck.checked) {
+                        if (normY > octavePeakValues[i]) {
+                            octavePeakValues[i] = normY;
+                        } else {
+                            octavePeakValues[i] = Math.max(0, octavePeakValues[i] - 2.5); // decay
+                        }
+                    }
                     
                     let grad = ctx.createLinearGradient(0, height, 0, 0);
                     grad.addColorStop(0, computedAccent);
@@ -718,9 +870,87 @@
 
                     ctx.fillRect(i * barWidth + 3, height - normY, barWidth - 6, normY);
 
-                    // Peak line per bar
-                    ctx.fillStyle = '#ffaa00';
-                    ctx.fillRect(i * barWidth + 3, height - normY - 3, barWidth - 6, 2);
+                    // Peak Hold Marker line
+                    if (peakHoldCheck.checked) {
+                        ctx.fillStyle = '#ffaa00';
+                        ctx.fillRect(i * barWidth + 3, height - octavePeakValues[i] - 3, barWidth - 6, 3);
+                    }
+                }
+                return;
+            }
+
+            if (mode === 'hiress_octave') {
+                // High-Resolution Narrow Octave Bands (60 bands)
+                const barCount = 60;
+                const barWidth = width / barCount;
+
+                if (hiressPeakValues.length !== barCount) {
+                    hiressPeakValues = new Array(barCount).fill(0);
+                }
+
+                for (let i = 0; i < barCount; i++) {
+                    let index = Math.floor(Math.pow(i / barCount, 2.0) * (bufferLength / 2));
+                    let value = dataArray[Math.min(index, bufferLength - 1)] || 0;
+                    let normY = (value / 255) * height;
+
+                    if (peakHoldCheck.checked) {
+                        if (normY > hiressPeakValues[i]) {
+                            hiressPeakValues[i] = normY;
+                        } else {
+                            hiressPeakValues[i] = Math.max(0, hiressPeakValues[i] - 3);
+                        }
+                    }
+
+                    ctx.fillStyle = computedAccent;
+                    ctx.fillRect(i * barWidth + 1, height - normY, barWidth - 2, normY);
+
+                    if (peakHoldCheck.checked) {
+                        ctx.fillStyle = '#ff3366';
+                        ctx.fillRect(i * barWidth + 1, height - hiressPeakValues[i] - 2, barWidth - 2, 2);
+                    }
+                }
+                return;
+            }
+
+            if (mode === 'vintage_led') {
+                // Vintage Stereo LED VU Bars (Classic hardware style: green bottom, yellow middle, red top, persistent peak dot)
+                const barCount = 36;
+                const barWidth = width / barCount;
+                const numLedSegments = 24;
+
+                if (hiressPeakValues.length !== barCount) {
+                    hiressPeakValues = new Array(barCount).fill(0);
+                }
+
+                for (let i = 0; i < barCount; i++) {
+                    let index = Math.floor((i / barCount) * (bufferLength / 2));
+                    let value = dataArray[index] || 0;
+                    let activeSegments = Math.round((value / 255) * numLedSegments);
+
+                    if (peakHoldCheck.checked) {
+                        if (activeSegments > hiressPeakValues[i]) {
+                            hiressPeakValues[i] = activeSegments;
+                        } else {
+                            hiressPeakValues[i] = Math.max(0, hiressPeakValues[i] - 0.15); // slow decay
+                        }
+                    }
+
+                    let segmentHeight = height / numLedSegments;
+                    for (let s = 0; s < numLedSegments; s++) {
+                        let y = height - ((s + 1) * segmentHeight);
+                        let isActive = s < activeSegments;
+                        let isPeakDot = peakHoldCheck.checked && Math.floor(hiressPeakValues[i]) === s;
+
+                        if (isActive || isPeakDot) {
+                            if (s < numLedSegments * 0.6) ctx.fillStyle = '#00cc66'; // Green bottom
+                            else if (s < numLedSegments * 0.85) ctx.fillStyle = '#ffaa00'; // Yellow middle
+                            else ctx.fillStyle = '#ff3366'; // Red top
+                        } else {
+                            ctx.fillStyle = 'rgba(255,255,255,0.03)'; // unlit led
+                        }
+
+                        ctx.fillRect(i * barWidth + 2, y + 1, barWidth - 4, segmentHeight - 2);
+                    }
                 }
                 return;
             }
@@ -787,7 +1017,7 @@
             }
             ctx.stroke();
 
-            // Peak Hold rendering
+            // Peak Hold rendering for continuous mode
             if (peakHoldCheck.checked && mode !== 'waterfall') {
                 ctx.strokeStyle = 'rgba(255, 170, 0, 0.85)';
                 ctx.lineWidth = 1;

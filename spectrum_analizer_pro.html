@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO-SPECTRUM ANALYZER - Professional Audio Suite</title>
+    <title>PRO-SPECTRUM ANALYZER v5</title>
     <style>
         :root {
             --bg-base: #0f1013;
@@ -11,8 +11,7 @@
             --panel-header: #1e1f26;
             --border-color: #2a2b36;
             --accent: #00bcd4;
-            --accent-dim: rgba(0, 188, 212, 0.15);
-            --accent-glow: rgba(0, 188, 212, 0.3);
+            --accent-glow: rgba(0, 188, 212, 0.25);
             --text-main: #e2e2e8;
             --text-muted: #8b8c9d;
             --danger: #e53935;
@@ -28,39 +27,36 @@
             user-select: none;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
             background-color: var(--bg-base);
             color: var(--text-main);
+            overflow: hidden;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 15px;
         }
 
         .plugin-container {
-            width: 100%;
-            max-width: 1350px;
+            width: 98vw;
+            height: 96vh;
+            max-width: 1400px;
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: all 0.3s ease;
         }
 
-        /* FULLSCREEN MODIFIER */
         .plugin-container:fullscreen {
             width: 100vw;
             height: 100vh;
             max-width: none;
             border-radius: 0;
             border: none;
-            display: flex;
-            flex-direction: column;
         }
 
         /* HEADER */
@@ -68,64 +64,62 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 20px;
+            padding: 10px 20px;
             background: var(--panel-header);
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .brand {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            align-items: baseline;
+            gap: 8px;
         }
 
         .brand h1 {
             font-size: 0.95rem;
-            font-weight: 600;
-            letter-spacing: 1.2px;
+            font-weight: 700;
+            letter-spacing: 1px;
             color: var(--text-main);
         }
 
-        .brand span {
+        .brand span.version-tag {
             font-size: 0.65rem;
             color: var(--text-muted);
-            background: rgba(255,255,255,0.05);
-            padding: 2px 6px;
-            border-radius: 3px;
-            border: 1px solid var(--border-color);
             font-weight: 400;
         }
 
         .master-controls {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
         }
 
-        /* RACK DI CONTROLLO PARAMETRI */
+        /* RACK PARAMETRI */
         .control-rack {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-            padding: 12px 20px;
-            background: rgba(0,0,0,0.15);
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.2);
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
             background: var(--panel-header);
-            padding: 8px 10px;
-            border-radius: 5px;
+            padding: 6px 10px;
+            border-radius: 4px;
             border: 1px solid var(--border-color);
         }
 
         .control-group label {
             font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 0.7px;
+            letter-spacing: 0.5px;
             color: var(--text-muted);
             display: flex;
             justify-content: space-between;
@@ -141,8 +135,8 @@
             background: var(--bg-base);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 5px;
-            border-radius: 4px;
+            padding: 4px;
+            border-radius: 3px;
             font-size: 0.75rem;
             outline: none;
             cursor: pointer;
@@ -152,18 +146,13 @@
             border-color: var(--accent);
         }
 
-        /* DISPLAY DELL'ANALIZZATORE */
+        /* DISPLAY CANVAS */
         .display-container {
             position: relative;
             width: 100%;
             flex: 1;
-            min-height: 480px;
             background: #0a0b0d;
-        }
-
-        .plugin-container:fullscreen .display-container {
-            height: auto;
-            flex-grow: 1;
+            overflow: hidden;
         }
 
         canvas {
@@ -172,7 +161,7 @@
             height: 100%;
         }
 
-        /* FOOTER & PRO RMS METERS */
+        /* FOOTER & RMS METER ESPANSO */
         footer {
             display: flex;
             justify-content: space-between;
@@ -180,31 +169,35 @@
             padding: 10px 20px;
             background: var(--panel-header);
             border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
             font-size: 0.75rem;
         }
 
         .meters-panel {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             align-items: center;
+            flex: 1;
         }
 
         .rms-wrapper {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            flex: 0.7; /* Occupazione prominente */
         }
 
         .rms-label {
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.75rem;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .rms-meter-container {
-            width: 220px;
-            height: 14px;
+            flex: 1;
+            height: 18px; /* Meter ingrandito */
             background: var(--bg-base);
             border-radius: 3px;
             overflow: hidden;
@@ -216,34 +209,36 @@
         .rms-meter-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--success) 0%, var(--success) 65%, var(--warning) 85%, var(--danger) 100%);
-            transition: width 0.04s linear;
+            background: linear-gradient(90deg, var(--success) 0%, var(--success) 70%, var(--warning) 88%, var(--danger) 100%);
+            transition: width 0.03s ease-out;
         }
 
         .rms-value-text {
             font-family: monospace;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: bold;
             color: var(--accent);
-            min-width: 45px;
+            min-width: 60px;
+            text-align: right;
         }
 
-        /* BOTTONI PROFESSIONALI */
+        /* BOTTONI */
         button.btn-action {
             background: var(--accent);
-            color: var(--bg-base);
+            color: #000;
             border: none;
-            padding: 7px 16px;
+            padding: 8px 18px;
             border-radius: 4px;
             font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             letter-spacing: 0.8px;
             transition: all 0.2s;
         }
 
         button.btn-action:hover {
-            box-shadow: 0 0 10px var(--accent-glow);
+            box-shadow: 0 0 12px var(--accent-glow);
             filter: brightness(1.1);
         }
 
@@ -256,12 +251,12 @@
             background: transparent;
             color: var(--text-main);
             border: 1px solid var(--border-color);
-            padding: 7px 14px;
+            padding: 8px 14px;
             border-radius: 4px;
             font-weight: 600;
             cursor: pointer;
             text-transform: uppercase;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             letter-spacing: 0.8px;
             transition: all 0.2s;
         }
@@ -293,53 +288,52 @@
         <header>
             <div class="brand">
                 <h1>PRO-SPECTRUM ANALYZER</h1>
-                <span>v5</span>
+                <span class="version-tag">v5</span>
             </div>
             <div class="master-controls">
-                <button id="fullscreenBtn" class="btn-secondary">Fullscreen</button>
-                <button id="toggleBtn" class="btn-action">Start Mic</button>
+                <button id="fullscreenBtn" class="btn-secondary">FULLSCREEN</button>
+                <button id="toggleBtn" class="btn-action">START MIC</button>
             </div>
         </header>
 
-        <!-- RACK PARAMETRI -->
+        <!-- CONTROLLI -->
         <div class="control-rack">
             <div class="control-group">
-                <label>FFT Resolution <span id="fftVal">4096</span></label>
+                <label>FFT Size <span id="fftVal">4096</span></label>
                 <select id="fftSelect">
                     <option value="2048">2048 (Fast)</option>
                     <option value="4096" selected>4096 (Balanced)</option>
                     <option value="8192">8192 (High Res)</option>
-                    <option value="16384">16384 (Ultra)</option>
+                    <option value="16384">16384 (Ultra Detail)</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>Color Theme <span id="themeVal">FabFilter</span></label>
+                <label>Color Theme</label>
                 <select id="themeSelect">
                     <option value="fabfilter">FabFilter Cyan</option>
                     <option value="ssl">SSL Console Green</option>
                     <option value="neve">Neve Vintage Amber</option>
                     <option value="prism">Prism Sound Blue</option>
-                    <option value="protools">Pro-Tools Graphite</option>
-                    <option value="slate">Slate Engineering</option>
+                    <option value="protools">Pro-Tools Charcoal</option>
+                    <option value="slate">Slate Technical Gray</option>
                     <option value="orange">Solaris High-Contrast</option>
                     <option value="cyber">Cyberpunk Accent</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>Visual Mode <span id="modeVal">Filled</span></label>
+                <label>Visual Mode</label>
                 <select id="modeSelect">
-                    <option value="filled">Filled Gradient Spectrum</option>
-                    <option value="line">Line Wireframe</option>
-                    <option value="bars">Standard FFT Bars</option>
+                    <option value="filled">Filled Spectrum Gradient</option>
+                    <option value="line">Precision Line Wireframe</option>
+                    <option value="bars">FFT Bins / Standard Bars</option>
                     <option value="iso13">ISO 1/3 Octave Bands</option>
-                    <option value="narrowOct">High-Res Narrow Octave</option>
+                    <option value="narrowOct">Narrow High-Res Bars</option>
                     <option value="vintage">Vintage Stereo LED VU</option>
-                    <option value="oscilloscope">Oscilloscope (Time Domain)</option>
-                    <option value="dual">Dual Trace (Spectrum + Wave)</option>
+                    <option value="oscilloscope">Oscilloscope (Waveform)</option>
                     <option value="waterfall">Waterfall 3D Spectrogram</option>
-                    <option value="circular">Radial Circular Spectrum</option>
+                    <option value="circular">Radial Spectrum</option>
                 </select>
             </div>
 
@@ -353,60 +347,58 @@
                 <input type="range" id="smoothRange" min="0.1" max="0.95" step="0.05" value="0.85">
             </div>
 
-            <div class="control-group" style="justify-content: center; gap: 6px;">
+            <div class="control-group" style="justify-content: center; gap: 4px;">
                 <label class="checkbox-label">
                     <input type="checkbox" id="peakHoldCheck" checked> Peak Hold / Decay
                 </label>
                 <label class="checkbox-label">
-                    <input type="checkbox" id="gridCheck" checked> Log Grid & Markers
+                    <input type="checkbox" id="gridCheck" checked> Log Grid & Labels
                 </label>
             </div>
         </div>
 
         <!-- CANVAS DISPLAY -->
-        <div class="display-container">
+        <div class="display-container" id="displayContainer">
             <canvas id="spectrumCanvas"></canvas>
         </div>
 
-        <!-- FOOTER & PRO RMS METERS -->
+        <!-- FOOTER WITH ENLARGED RMS METER -->
         <footer>
             <div class="meters-panel">
                 <div class="rms-wrapper">
-                    <span class="rms-label">INPUT RMS:</span>
+                    <span class="rms-label">INPUT RMS METER:</span>
                     <div class="rms-meter-container">
                         <div id="rmsFill" class="rms-meter-fill"></div>
                     </div>
                     <span id="rmsValueText" class="rms-value-text">-inf dB</span>
                 </div>
-                <div class="status-item">Status: <strong id="statusText" style="color: var(--text-muted);">Idle</strong></div>
             </div>
-            <div class="status-item">Sample Rate: <strong id="sampleRateVal">-- kHz</strong></div>
+            <div class="status-item">Status: <strong id="statusText" style="color: var(--text-muted);">Idle</strong></div>
+            <div class="status-item" style="margin-left: 20px;">SR: <strong id="sampleRateVal">-- kHz</strong></div>
         </footer>
     </div>
 
     <script>
         const themes = {
-            fabfilter: { accent: '#00e5ff', dim: 'rgba(0, 229, 255, 0.15)', glow: 'rgba(0, 229, 255, 0.3)', bg: '#0f1013', panel: '#16171c', header: '#1e1f26', border: '#2a2b36' },
-            ssl: { accent: '#00e676', dim: 'rgba(0, 230, 118, 0.15)', glow: 'rgba(0, 230, 118, 0.3)', bg: '#0d1210', panel: '#131a16', header: '#1b241f', border: '#25332b' },
-            neve: { accent: '#ffab00', dim: 'rgba(255, 171, 0, 0.15)', glow: 'rgba(255, 171, 0, 0.3)', bg: '#14120e', panel: '#1c1914', header: '#26221b', border: '#332e25' },
-            prism: { accent: '#40c4ff', dim: 'rgba(64, 196, 255, 0.15)', glow: 'rgba(64, 196, 255, 0.3)', bg: '#0f1117', panel: '#151922', header: '#1e2330', border: '#293142' },
-            protools: { accent: '#b388ff', dim: 'rgba(179, 136, 255, 0.15)', glow: 'rgba(179, 136, 255, 0.3)', bg: '#111014', panel: '#191720', header: '#221f2c', border: '#2e2b3c' },
-            slate: { accent: '#90a4ae', dim: 'rgba(144, 164, 174, 0.15)', glow: 'rgba(144, 164, 174, 0.3)', bg: '#101112', panel: '#17191a', header: '#202324', border: '#2c3033' },
-            orange: { accent: '#ff6d00', dim: 'rgba(255, 109, 0, 0.15)', glow: 'rgba(255, 109, 0, 0.3)', bg: '#140f0c', panel: '#1c1613', header: '#261f1b', border: '#332a25' },
-            cyber: { accent: '#ff0055', dim: 'rgba(255, 0, 85, 0.15)', glow: 'rgba(255, 0, 85, 0.3)', bg: '#140d10', panel: '#1c1317', header: '#261a20', border: '#33242c' }
+            fabfilter: { accent: '#00e5ff', glow: 'rgba(0, 229, 255, 0.25)', bg: '#0f1013', panel: '#16171c', header: '#1e1f26', border: '#2a2b36' },
+            ssl: { accent: '#00e676', glow: 'rgba(0, 230, 118, 0.25)', bg: '#0d1210', panel: '#131a16', header: '#1b241f', border: '#25332b' },
+            neve: { accent: '#ffab00', glow: 'rgba(255, 171, 0, 0.25)', bg: '#14120e', panel: '#1c1914', header: '#26221b', border: '#332e25' },
+            prism: { accent: '#40c4ff', glow: 'rgba(64, 196, 255, 0.25)', bg: '#0f1117', panel: '#151922', header: '#1e2330', border: '#293142' },
+            protools: { accent: '#b388ff', glow: 'rgba(179, 136, 255, 0.25)', bg: '#111014', panel: '#191720', header: '#221f2c', border: '#2e2b3c' },
+            slate: { accent: '#90a4ae', glow: 'rgba(144, 164, 174, 0.25)', bg: '#101112', panel: '#17191a', header: '#202324', border: '#2c3033' },
+            orange: { accent: '#ff6d00', glow: 'rgba(255, 109, 0, 0.25)', bg: '#140f0c', panel: '#1c1613', header: '#261f1b', border: '#332a25' },
+            cyber: { accent: '#ff0055', glow: 'rgba(255, 0, 85, 0.25)', bg: '#140d10', panel: '#1c1317', header: '#261a20', border: '#33242c' }
         };
 
         function setTheme(themeName) {
             const t = themes[themeName] || themes.fabfilter;
             const r = document.documentElement;
             r.style.setProperty('--accent', t.accent);
-            r.style.setProperty('--accent-dim', t.dim);
             r.style.setProperty('--accent-glow', t.glow);
             r.style.setProperty('--bg-base', t.bg);
             r.style.setProperty('--panel-bg', t.panel);
             r.style.setProperty('--panel-header', t.header);
             r.style.setProperty('--border-color', t.border);
-            document.getElementById('themeVal').textContent = themeSelect.options[themeSelect.selectedIndex].text.split(' ')[0];
         }
 
         const toggleBtn = document.getElementById('toggleBtn');
@@ -420,7 +412,6 @@
         const fftVal = document.getElementById('fftVal');
         const themeSelect = document.getElementById('themeSelect');
         const modeSelect = document.getElementById('modeSelect');
-        const modeVal = document.getElementById('modeVal');
         const tiltRange = document.getElementById('tiltRange');
         const tiltVal = document.getElementById('tiltVal');
         const smoothRange = document.getElementById('smoothRange');
@@ -436,27 +427,26 @@
         let microphone = null;
         let isRunning = false;
         let animationId = null;
+
+        // Buffers per Peak Holds
         let peakValues = [];
         let octavePeakValues = [];
-        let narrowPeakValues = [];
         let vintagePeakValues = [];
         let waterfallBuffer = [];
 
         function resizeCanvas() {
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * window.devicePixelRatio;
-            canvas.height = rect.height * window.devicePixelRatio;
+            const displayContainer = document.getElementById('displayContainer');
+            canvas.width = displayContainer.clientWidth * window.devicePixelRatio;
+            canvas.height = displayContainer.clientHeight * window.devicePixelRatio;
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            drawGrid();
         }
 
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                pluginContainer.requestFullscreen().catch(err => {
-                    alert(`Errore attivazione Fullscreen: ${err.message}`);
-                });
+                pluginContainer.requestFullscreen().catch(err => alert(err.message));
             } else {
                 document.exitFullscreen();
             }
@@ -464,11 +454,11 @@
 
         document.addEventListener('fullscreenchange', () => {
             if (document.fullscreenElement) {
-                fullscreenBtn.textContent = 'Exit Fullscreen';
+                fullscreenBtn.textContent = 'EXIT FULLSCREEN';
             } else {
-                fullscreenBtn.textContent = 'Fullscreen';
+                fullscreenBtn.textContent = 'FULLSCREEN';
             }
-            setTimeout(resizeCanvas, 50);
+            setTimeout(resizeCanvas, 100);
         });
 
         fftSelect.addEventListener('change', () => {
@@ -478,11 +468,7 @@
         });
 
         themeSelect.addEventListener('change', () => setTheme(themeSelect.value));
-        modeSelect.addEventListener('change', () => {
-            modeVal.textContent = modeSelect.options[modeSelect.selectedIndex].text.split(' ')[0];
-            resetPeaks();
-        });
-
+        modeSelect.addEventListener('change', () => resetPeaks());
         tiltRange.addEventListener('input', () => { tiltVal.textContent = tiltRange.value + ' dB/oct'; });
         smoothRange.addEventListener('input', () => {
             smoothVal.textContent = smoothRange.value;
@@ -492,7 +478,6 @@
         function resetPeaks() {
             peakValues = [];
             octavePeakValues = [];
-            narrowPeakValues = [];
             vintagePeakValues = [];
             waterfallBuffer = [];
         }
@@ -511,17 +496,18 @@
                 microphone.connect(analyser);
                 
                 isRunning = true;
-                toggleBtn.textContent = 'Stop';
+                toggleBtn.textContent = 'STOP';
                 toggleBtn.classList.add('active');
-                statusText.textContent = 'Live Input Active';
+                statusText.textContent = 'Live Mic Active';
                 statusText.style.color = 'var(--success)';
                 sampleRateVal.textContent = (audioCtx.sampleRate / 1000).toFixed(1) + ' kHz';
                 
+                resizeCanvas();
                 drawSpectrum();
             } catch (err) {
-                alert('Impossibile accedere al microfono. Verifica i permessi del browser.');
+                alert('Errore di accesso al microfono: controlla i permessi del browser.');
                 console.error(err);
-                statusText.textContent = 'Mic Error';
+                statusText.textContent = 'Error';
             }
         }
 
@@ -532,14 +518,16 @@
             if (audioCtx) audioCtx.close();
             cancelAnimationFrame(animationId);
             isRunning = false;
-            toggleBtn.textContent = 'Start Mic';
+            toggleBtn.textContent = 'START MIC';
             toggleBtn.classList.remove('active');
             statusText.textContent = 'Idle';
             statusText.style.color = 'var(--text-muted)';
             rmsFill.style.width = '0%';
             rmsValueText.textContent = '-inf dB';
             
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+            ctx.clearRect(0, 0, width, height);
             drawGrid();
         }
 
@@ -551,3 +539,318 @@
         function drawGrid() {
             if (!gridCheck.checked) return;
             const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#777785';
+            ctx.font = '10px sans-serif';
+
+            const dbSteps = [-6, -18, -30, -42, -54, -66];
+            dbSteps.forEach(db => {
+                const y = height * (1 - (db + 72) / 72);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+                ctx.fillText(`${db} dB`, 10, y - 4);
+            });
+
+            const freqMarkers = [
+                { f: 50, label: '50Hz' },
+                { f: 100, label: '100Hz' },
+                { f: 250, label: '250Hz' },
+                { f: 500, label: '500Hz' },
+                { f: 1000, label: '1kHz' },
+                { f: 2500, label: '2.5kHz' },
+                { f: 5000, label: '5kHz' },
+                { f: 10000, label: '10kHz' },
+                { f: 20000, label: '20kHz' }
+            ];
+
+            const minLog = Math.log10(20);
+            const maxLog = Math.log10(20000);
+
+            freqMarkers.forEach(marker => {
+                const logFreq = Math.log10(marker.f);
+                const x = width * (logFreq - minLog) / (maxLog - minLog);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+                ctx.fillText(marker.label, x + 4, height - 8);
+            });
+        }
+
+        function drawSpectrum() {
+            if (!isRunning) return;
+
+            animationId = requestAnimationFrame(drawSpectrum);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            const timeDataArray = new Uint8Array(bufferLength);
+            analyser.getByteTimeDomainData(timeDataArray);
+
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, width, height);
+            drawGrid();
+
+            const nyquist = audioCtx.sampleRate / 2;
+            const minLog = Math.log10(20);
+            const maxLog = Math.log10(20000);
+            const tiltFactor = parseFloat(tiltRange.value);
+            const mode = modeSelect.value;
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+
+            // Calcolo RMS preciso per il meter nel footer
+            let sumSquares = 0;
+            for(let i = 0; i < bufferLength; i++) {
+                let norm = (timeDataArray[i] - 128) / 128;
+                sumSquares += norm * norm;
+            }
+            let rms = Math.sqrt(sumSquares / bufferLength);
+            let rmsDb = rms > 0.00001 ? 20 * Math.log10(rms) : -60;
+            let rmsPercent = Math.max(0, Math.min(100, ((rmsDb + 50) / 50) * 100));
+            
+            rmsFill.style.width = rmsPercent + '%';
+            rmsValueText.textContent = rmsDb > -58 ? rmsDb.toFixed(1) + ' dB' : '-inf dB';
+
+            // --- VISUAL MODES ---
+
+            if (mode === 'oscilloscope') {
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = accentColor;
+                ctx.beginPath();
+                const sliceWidth = width / bufferLength;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    let v = timeDataArray[i] / 128.0;
+                    let y = (v * height) / 2;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                    x += sliceWidth;
+                }
+                ctx.stroke();
+                return;
+            }
+
+            if (mode === 'iso13' || mode === 'narrowOct') {
+                const bandCount = mode === 'iso13' ? 31 : 64;
+                if (octavePeakValues.length !== bandCount) octavePeakValues = new Array(bandCount).fill(height);
+
+                const barWidth = width / bandCount;
+                for (let i = 0; i < bandCount; i++) {
+                    let freqStart = 20 * Math.pow(1000, i / bandCount);
+                    let freqEnd = 20 * Math.pow(1000, (i + 1) / bandCount);
+                    let idxStart = Math.round((freqStart / nyquist) * bufferLength);
+                    let idxEnd = Math.round((freqEnd / nyquist) * bufferLength);
+
+                    let sum = 0, count = 0;
+                    for (let j = idxStart; j <= idxEnd && j < bufferLength; j++) {
+                        sum += dataArray[j];
+                        count++;
+                    }
+                    let avg = count > 0 ? sum / count : 0;
+                    let octaveMultiplier = Math.log2((freqStart + freqEnd) / 2000);
+                    let adjusted = Math.min(255, Math.max(0, avg + (octaveMultiplier * tiltFactor)));
+                    let barHeight = (adjusted / 255) * (height - 20);
+                    let y = height - barHeight;
+
+                    // Stabile Decay Peak Hold
+                    if (peakHoldCheck.checked) {
+                        if (y < octavePeakValues[i]) {
+                            octavePeakValues[i] = y;
+                        } else {
+                            octavePeakValues[i] += 1.5;
+                            if (octavePeakValues[i] > height) octavePeakValues[i] = height;
+                        }
+                    }
+
+                    ctx.fillStyle = accentColor;
+                    ctx.fillRect(i * barWidth + 1, y, barWidth - 2, barHeight);
+
+                    if (peakHoldCheck.checked) {
+                        ctx.fillStyle = '#ffb300';
+                        ctx.fillRect(i * barWidth + 1, octavePeakValues[i], barWidth - 2, 2);
+                    }
+                }
+                return;
+            }
+
+            if (mode === 'vintage') {
+                const numLeds = 22;
+                const totalBars = 32;
+                const barWidth = width / totalBars;
+                if (vintagePeakValues.length !== totalBars) vintagePeakValues = new Array(totalBars).fill(0);
+
+                for (let i = 0; i < totalBars; i++) {
+                    let freq = 20 * Math.pow(1000, i / (totalBars * 0.75));
+                    let idx = Math.round((freq / nyquist) * bufferLength);
+                    let val = dataArray[Math.min(idx, bufferLength - 1)] || 0;
+                    let activeLeds = Math.round((val / 255) * numLeds);
+
+                    // Peak Hold senza flicker
+                    if (activeLeds >= vintagePeakValues[i]) {
+                        vintagePeakValues[i] = activeLeds;
+                    } else if (vintagePeakValues[i] > 0) {
+                        vintagePeakValues[i] -= 0.25; // Smooth decay
+                    }
+                    let peakLedIdx = Math.floor(vintagePeakValues[i]);
+
+                    const ledHeight = (height - 30) / numLeds;
+                    for (let l = 0; l < numLeds; l++) {
+                        let y = height - 15 - ((l + 1) * ledHeight);
+                        let isLit = l < activeLeds;
+                        let isPeak = l === peakLedIdx && peakHoldCheck.checked && peakLedIdx > 0;
+
+                        if (isPeak) {
+                            ctx.fillStyle = '#ff3333'; // Peak fisso rosso senza sfarfallio
+                        } else if (isLit) {
+                            if (l >= numLeds - 3) ctx.fillStyle = '#ff3333';
+                            else if (l >= numLeds - 7) ctx.fillStyle = '#ffb300';
+                            else ctx.fillStyle = '#43a047';
+                        } else {
+                            ctx.fillStyle = 'rgba(255,255,255,0.03)';
+                        }
+                        ctx.fillRect(i * barWidth + 2, y, barWidth - 4, ledHeight - 2);
+                    }
+                }
+                return;
+            }
+
+            if (mode === 'circular') {
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const radius = Math.min(centerX, centerY) * 0.55;
+
+                ctx.strokeStyle = accentColor;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+
+                const bins = 180;
+                for (let i = 0; i < bins; i++) {
+                    let angle = (i / bins) * Math.PI * 2 - Math.PI / 2;
+                    let dataIdx = Math.round((i / bins) * (bufferLength / 2));
+                    let val = (dataArray[dataIdx] / 255) * 100;
+
+                    let r = radius + val;
+                    let x = centerX + Math.cos(angle) * r;
+                    let y = centerY + Math.sin(angle) * r;
+
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                return;
+            }
+
+            if (mode === 'waterfall') {
+                let slice = [];
+                for (let x = 0; x < width; x += 4) {
+                    let logFreq = minLog + (x / width) * (maxLog - minLog);
+                    let freq = Math.pow(10, logFreq);
+                    let idx = Math.round((freq / nyquist) * bufferLength);
+                    slice.push(dataArray[idx] || 0);
+                }
+                waterfallBuffer.unshift(slice);
+                if (waterfallBuffer.length > 70) waterfallBuffer.pop();
+
+                let sliceH = height / waterfallBuffer.length;
+                for (let row = 0; row < waterfallBuffer.length; row++) {
+                    let data = waterfallBuffer[row];
+                    let y = row * sliceH;
+                    for (let col = 0; col < data.length; col++) {
+                        let val = data[col];
+                        let alpha = (1 - (row / waterfallBuffer.length)) * (val / 255);
+                        ctx.fillStyle = accentColor;
+                        ctx.globalAlpha = alpha;
+                        ctx.fillRect(col * 4, y, 4, sliceH);
+                    }
+                }
+                ctx.globalAlpha = 1.0;
+                return;
+            }
+
+            // Standard Filled / Line / Bars Modes
+            if (peakValues.length !== Math.round(width)) {
+                peakValues = new Array(Math.round(width)).fill(height);
+            }
+
+            ctx.lineWidth = mode === 'line' ? 2 : 1.5;
+            ctx.strokeStyle = accentColor;
+            
+            let gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, getComputedStyle(document.documentElement).getPropertyValue('--accent-glow').trim());
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+
+            let points = [];
+            for (let x = 0; x < width; x++) {
+                const logFreq = minLog + (x / width) * (maxLog - minLog);
+                const freq = Math.pow(10, logFreq);
+                if (freq > nyquist) continue;
+
+                const index = Math.round((freq / nyquist) * bufferLength);
+                let value = dataArray[index] || 0;
+
+                let octaveMultiplier = Math.log2(freq / 1000); 
+                let adjustedValue = Math.min(255, Math.max(0, value + (octaveMultiplier * tiltFactor * 1.5)));
+                let y = height * (1 - (adjustedValue / 255));
+
+                points.push({ x, y });
+
+                if (peakHoldCheck.checked) {
+                    if (y < peakValues[x]) {
+                        peakValues[x] = y;
+                    } else {
+                        peakValues[x] += 1.5;
+                        if (peakValues[x] > height) peakValues[x] = height;
+                    }
+                }
+
+                if (mode === 'bars' && x % 4 === 0) {
+                    ctx.fillStyle = accentColor;
+                    ctx.fillRect(x, y, 3, height - y);
+                }
+            }
+
+            if (mode !== 'bars' && points.length > 0) {
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let p of points) ctx.lineTo(p.x, p.y);
+                if (mode === 'filled') {
+                    ctx.lineTo(width, height);
+                    ctx.lineTo(0, height);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.stroke();
+            }
+
+            if (peakHoldCheck.checked && mode !== 'bars') {
+                ctx.strokeStyle = '#ffb300';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let x = 0; x < width; x++) {
+                    if (x === 0) ctx.moveTo(x, peakValues[x]);
+                    else ctx.lineTo(x, peakValues[x]);
+                }
+                ctx.stroke();
+            }
+        }
+
+        // Init App
+        setTheme('fabfilter');
+        resizeCanvas();
+    </script>
+</body>
+</html>

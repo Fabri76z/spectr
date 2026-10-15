@@ -378,12 +378,11 @@
         <!-- HEADER -->
         <header>
             <div class="brand">
-                <h1>PRO-SPECTRUM ANALYZER</h1>
-                <span>ULTRA V5.0</span>
+                <h1>SPECTRUM ANALYZER v5.0</h1>
             </div>
             <div class="master-controls">
                 <button id="fullscreenBtn" class="btn-secondary">Fullscreen</button>
-                <button id="toggleBtn" class="btn-primary">Avvia Microfono</button>
+                <button id="toggleBtn" class="btn-primary">Start Mic</button>
             </div>
         </header>
 
@@ -567,7 +566,7 @@
                 microphone.connect(analyser);
                 
                 isRunning = true;
-                toggleBtn.textContent = 'Ferma Analisi';
+                toggleBtn.textContent = 'Stop';
                 toggleBtn.classList.add('active');
                 statusText.textContent = 'Attivo (Live Mic)';
                 statusText.style.color = 'var(--success)';

@@ -114,12 +114,12 @@
             btnToggle.disabled = true;
         } else {
             const recognition = new SpeechRecognition();
-            recognition.lang = 'it-IT'; // Imposta la lingua italiana
-            recognition.continuous = true; // Continua a registrare
-            recognition.interimResults = true; // Mostra i risultati mentre parli
+            recognition.lang = 'it-IT';
+            recognition.continuous = true;
+            recognition.interimResults = true;
 
             let isRecording = false;
-            let finalTranscript = '';
+            let baseTranscript = ''; // Contiene il testo già confermato prima dell'avvio o durante le pause
 
             recognition.onstart = () => {
                 isRecording = true;
@@ -129,15 +129,15 @@
             };
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                let currentSessionTranscript = '';
+
+                // Cicliamo su TUTTI i risultati dell'evento corrente
+                for (let i = 0; i < event.results.length; ++i) {
+                    currentSessionTranscript += event.results[i][0].transcript;
                 }
-                transcriptArea.value = finalTranscript + interimTranscript;
+
+                // Mostriamo il testo base + tutto quello riconosciuto nella sessione attuale
+                transcriptArea.value = baseTranscript + currentSessionTranscript;
             };
 
             recognition.onerror = (event) => {
@@ -157,7 +157,8 @@
                 if (isRecording) {
                     recognition.stop();
                 } else {
-                    finalTranscript = transcriptArea.value ? transcriptArea.value + ' ' : '';
+                    // Salviamo il contenuto attuale della textarea per non sovrascriverlo
+                    baseTranscript = transcriptArea.value ? transcriptArea.value + ' ' : '';
                     recognition.start();
                 }
             });

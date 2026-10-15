@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Spectrum Analyzer - Professional Audio Suite</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --panel-bg: #1a1a1e;
+            --border-color: #2a2a30;
+            --accent-color: #00e5ff;
+            --accent-glow: rgba(0, 229, 255, 0.2);
+            --text-main: #e0e0e6;
+            --text-muted: #888893;
+            --grid-color: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 span {
+            color: var(--accent-color);
+            font-size: 0.8rem;
+            background: rgba(0, 229, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-glow);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        button {
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 8px 18px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        button.active {
+            background: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        .display-area {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            background: #0d0d0f;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 25px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .status-item span {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>PRO-SPECTRUM <span>V3.0 RT</span></h1>
+            <div class="controls">
+                <button id="toggleBtn">Avvia Analisi Mic</button>
+            </div>
+        </header>
+
+        <div class="display-area">
+            <canvas id="spectrumCanvas"></canvas>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">Stato: <span id="statusText">Inattivo</span></div>
+            <div class="status-item">FFT Size: <span>4096</span></div>
+            <div class="status-item">Finestra: <span>Hann</span></div>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggleBtn');
+        const statusText = document.getElementById('statusText');
+        const canvas = document.getElementById('spectrumCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let audioCtx = null;
+        let analyser = null;
+        let microphone = null;
+        let isRunning = false;
+        let animationId = null;
+
+        // Ridimensionamento dinamico del canvas ad alta risoluzione (Retina support)
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        async function initAudio() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                microphone = audioCtx.createMediaStreamSource(stream);
+                analyser = audioCtx.createAnalyser();
+                
+                analyser.fftSize = 4096;
+                analyser.smoothingTimeConstant = 0.85;
+                
+                microphone.connect(analyser);
+                
+                isRunning = true;
+                toggleBtn.textContent = 'Ferma Analisi';
+                toggleBtn.classList.add('active');
+                statusText.textContent = 'Attivo (Microfono Live)';
+                
+                drawSpectrum();
+            } catch (err) {
+                alert('Errore di accesso al microfono: Assicurati di aver concesso i permessi.');
+                console.error(err);
+                statusText.textContent = 'Errore permessi';
+            }
+        }
+
+        function stopAudio() {
+            if (microphone && microphone.mediaStream) {
+                microphone.mediaStream.getTracks().forEach(track => track.stop());
+            }
+            if (audioCtx) {
+                audioCtx.close();
+            }
+            cancelAnimationFrame(animationId);
+            isRunning = false;
+            toggleBtn.textContent = 'Avvia Analisi Mic';
+            toggleBtn.classList.remove('active');
+            statusText.textContent = 'Inattivo';
+            
+            // Pulisci il canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            if (!isRunning) {
+                initAudio();
+            } else {
+                stopAudio();
+            }
+        });
+
+        function drawGrid() {
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#888893';
+            ctx.font = '10px sans-serif';
+
+            // Linee orizzontali dB (-12, -24, -36, -48, -60 dB)
+            const dbSteps = [-12, -24, -36, -48, -60];
+            dbSteps.forEach(db => {
+                const y = height * (1 - (db + 60) / 60);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+                ctx.fillText(`${db} dB`, 10, y - 5);
+            });
+
+            // Linee verticali Frequenze (20Hz, 100Hz, 1kHz, 10kHz)
+            const freqMarkers = [
+                { f: 50, label: '50Hz' },
+                { f: 100, label: '100Hz' },
+                { f: 500, label: '500Hz' },
+                { f: 1000, label: '1kHz' },
+                { f: 5000, label: '5kHz' },
+                { f: 10000, label: '10kHz' },
+                { f: 20000, label: '20kHz' }
+            ];
+
+            const minLog = Math.log10(20);
+            const maxLog = Math.log10(20000);
+
+            freqMarkers.forEach(marker => {
+                const logFreq = Math.log10(marker.f);
+                const x = width * (logFreq - minLog) / (maxLog - minLog);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+                ctx.fillText(marker.label, x + 4, height - 10);
+            });
+        }
+
+        function drawSpectrum() {
+            if (!isRunning) return;
+
+            animationId = requestAnimationFrame(drawSpectrum);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, width, height);
+            drawGrid();
+
+            // Disegno della curva dello spettro
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#00e5ff';
+            ctx.fillStyle = 'rgba(0, 229, 255, 0.08)';
+
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+
+            const nyquist = audioCtx.sampleRate / 2;
+            const minLog = Math.log10(20);
+            const maxLog = Math.log10(20000);
+
+            for (let x = 0; x < width; x++) {
+                // Mappatura inversa da coordinata X a frequenza logaritmica
+                const logFreq = minLog + (x / width) * (maxLog - minLog);
+                const freq = Math.pow(10, logFreq);
+                
+                if (freq > nyquist) break;
+
+                const index = Math.round((freq / nyquist) * bufferLength);
+                const value = dataArray[index] || 0;
+                
+                // Conversione da 0-255 a coordinata Y invertita
+                const y = height * (1 - value / 255);
+
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        // Disegno iniziale della griglia a riposo
+        drawGrid();
+    </script>
+</body>
+</html>

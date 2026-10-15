@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trascrizione Vocale</title>
+    <title>Trascrizione Vocale v1.0</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -89,7 +89,7 @@
 <body>
 
     <div class="container">
-        <h1>Trascrizione Vocale</h1>
+        <h1>Trascrizione Vocale <small style="font-size: 14px; color: #7f8c8d; font-weight: normal;">v1.0</small></h1>
         <p class="subtitle">Parla nel microfono per trascrivere la tua voce in tempo reale.</p>
         
         <textarea id="transcript" placeholder="La trascrizione apparirà qui..."></textarea>
@@ -119,7 +119,7 @@
             recognition.interimResults = true;
 
             let isRecording = false;
-            let baseTranscript = ''; // Contiene il testo già confermato prima dell'avvio o durante le pause
+            let finalizedText = '';
 
             recognition.onstart = () => {
                 isRecording = true;
@@ -129,15 +129,17 @@
             };
 
             recognition.onresult = (event) => {
-                let currentSessionTranscript = '';
-
-                // Cicliamo su TUTTI i risultati dell'evento corrente
-                for (let i = 0; i < event.results.length; ++i) {
-                    currentSessionTranscript += event.results[i][0].transcript;
+                let interimText = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalizedText += event.results[i][0].transcript + ' ';
+                    } else {
+                        interimText += event.results[i][0].transcript;
+                    }
                 }
 
-                // Mostriamo il testo base + tutto quello riconosciuto nella sessione attuale
-                transcriptArea.value = baseTranscript + currentSessionTranscript;
+                transcriptArea.value = finalizedText + interimText;
             };
 
             recognition.onerror = (event) => {
@@ -157,8 +159,10 @@
                 if (isRecording) {
                     recognition.stop();
                 } else {
-                    // Salviamo il contenuto attuale della textarea per non sovrascriverlo
-                    baseTranscript = transcriptArea.value ? transcriptArea.value + ' ' : '';
+                    if (transcriptArea.value && !transcriptArea.value.endsWith(' ')) {
+                        transcriptArea.value += ' ';
+                    }
+                    finalizedText = transcriptArea.value;
                     recognition.start();
                 }
             });

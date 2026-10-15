@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trascrizione Vocale v1.2</title>
+    <title>Trascrizione Vocale v1.4</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -89,7 +89,7 @@
 <body>
 
     <div class="container">
-        <h1>Trascrizione Vocale <small style="font-size: 14px; color: #7f8c8d; font-weight: normal;">v1.2</small></h1>
+        <h1>Trascrizione Vocale <small style="font-size: 14px; color: #7f8c8d; font-weight: normal;">v1.4</small></h1>
         <p class="subtitle">Parla nel microfono per trascrivere la tua voce in tempo reale.</p>
         
         <textarea id="transcript" placeholder="La trascrizione apparirà qui..."></textarea>
@@ -119,20 +119,7 @@
             recognition.interimResults = true;
 
             let isRecording = false;
-            let finalizedText = '';
-
-            // Funzione per ripulire il testo da eventuali eco o duplicazioni consecutive inviate dal browser
-            function removeDuplicatePhrases(text) {
-                const words = text.trim().split(/\s+/);
-                const cleanedWords = [];
-                for (let i = 0; i < words.length; i++) {
-                    // Evita di aggiungere parole se formano un blocco ripetuto identico a quello precedente
-                    if (i === 0 || words[i].toLowerCase() !== words[i - 1].toLowerCase()) {
-                        cleanedWords.push(words[i]);
-                    }
-                }
-                return cleanedWords.join(' ');
-            }
+            let baseText = ''; // Testo fisso precedente all'avvio della sessione corrente
 
             recognition.onstart = () => {
                 isRecording = true;
@@ -142,20 +129,15 @@
             };
 
             recognition.onresult = (event) => {
-                let interimText = '';
-                
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    const transcriptPiece = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalizedText += transcriptPiece + ' ';
-                    } else {
-                        interimText += transcriptPiece;
-                    }
+                let currentSessionText = '';
+
+                // Cicliamo su tutti i risultati disponibili nella sessione corrente forniti dal browser
+                for (let i = 0; i < event.results.length; ++i) {
+                    currentSessionText += event.results[i][0].transcript;
                 }
 
-                let combined = finalizedText + interimText;
-                // Applica il filtro di pulizia per bloccare i loop di parole
-                transcriptArea.value = removeDuplicatePhrases(combined);
+                // SOVRASCRITTURA: uniamo la base iniziale con il blocco completo aggiornato restituito dal browser
+                transcriptArea.value = baseText + (baseText && currentSessionText ? ' ' : '') + currentSessionText;
             };
 
             recognition.onerror = (event) => {
@@ -166,7 +148,7 @@
                 isRecording = false;
                 btnToggle.textContent = "Avvia Registrazione";
                 btnToggle.classList.remove('recording');
-                if (statusDiv.textContent === "In ascolto... Parla pure.") {
+                if (statusDiv.textContent.includes("In ascolto")) {
                     statusDiv.textContent = "Registrazione terminata.";
                 }
             };
@@ -175,10 +157,8 @@
                 if (isRecording) {
                     recognition.stop();
                 } else {
-                    if (transcriptArea.value && !transcriptArea.value.endsWith(' ')) {
-                        transcriptArea.value += ' ';
-                    }
-                    finalizedText = transcriptArea.value;
+                    // Quando avviamo, memorizziamo tutto il testo già presente come "base fissa"
+                    baseText = transcriptArea.value.trim();
                     recognition.start();
                 }
             });

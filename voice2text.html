@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trascrizione Vocale</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        p.subtitle {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #btnToggle {
+            background-color: #2ecc71;
+            color: white;
+        }
+        #btnToggle.recording {
+            background-color: #e74c3c;
+        }
+        #btnCopy {
+            background-color: #3498db;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #status {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #e67e22;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Trascrizione Vocale</h1>
+        <p class="subtitle">Parla nel microfono per trascrivere la tua voce in tempo reale.</p>
+        
+        <textarea id="transcript" placeholder="La trascrizione apparirà qui..."></textarea>
+        
+        <div class="btn-group">
+            <button id="btnToggle">Avvia Registrazione</button>
+            <button id="btnCopy">Copia Testo</button>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const statusDiv = document.getElementById('status');
+        const btnToggle = document.getElementById('btnToggle');
+        const btnCopy = document.getElementById('btnCopy');
+        const transcriptArea = document.getElementById('transcript');
+
+        if (!SpeechRecognition) {
+            statusDiv.textContent = "Il tuo browser non supporta la Web Speech API. Prova a usare Google Chrome.";
+            btnToggle.disabled = true;
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'it-IT'; // Imposta la lingua italiana
+            recognition.continuous = true; // Continua a registrare
+            recognition.interimResults = true; // Mostra i risultati mentre parli
+
+            let isRecording = false;
+            let finalTranscript = '';
+
+            recognition.onstart = () => {
+                isRecording = true;
+                btnToggle.textContent = "Ferma Registrazione";
+                btnToggle.classList.add('recording');
+                statusDiv.textContent = "In ascolto... Parla pure.";
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                transcriptArea.value = finalTranscript + interimTranscript;
+            };
+
+            recognition.onerror = (event) => {
+                statusDiv.textContent = "Errore durante il riconoscimento: " + event.error;
+            };
+
+            recognition.onend = () => {
+                isRecording = false;
+                btnToggle.textContent = "Avvia Registrazione";
+                btnToggle.classList.remove('recording');
+                if (statusDiv.textContent === "In ascolto... Parla pure.") {
+                    statusDiv.textContent = "Registrazione terminata.";
+                }
+            };
+
+            btnToggle.addEventListener('click', () => {
+                if (isRecording) {
+                    recognition.stop();
+                } else {
+                    finalTranscript = transcriptArea.value ? transcriptArea.value + ' ' : '';
+                    recognition.start();
+                }
+            });
+
+            btnCopy.addEventListener('click', () => {
+                transcriptArea.select();
+                navigator.clipboard.writeText(transcriptArea.value)
+                    .then(() => {
+                        const originalText = btnCopy.textContent;
+                        btnCopy.textContent = "Copiato!";
+                        setTimeout(() => {
+                            btnCopy.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        statusDiv.textContent = "Errore durante la copia negli appunti.";
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
